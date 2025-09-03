@@ -1,0 +1,393 @@
+\documentclass[12pt,letterpaper, onecolumn]{exam}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{listings}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{asymptote}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=blue,
+    pdftitle={Overleaf Example},
+    pdfpagemode=FullScreen,
+    }
+\usepackage[lmargin=71pt, tmargin=1.2in]{geometry}  %For centering solution box
+
+% \chead{\hline} % Un-comment to draw line below header
+\thispagestyle{empty}   %For removing header/footer from page 1
+
+\begin{document}
+\pagestyle{fancy}
+\fancyhead{} % clear all header fields
+\fancyhead[RO]{Villarini \thepage}
+
+\begingroup  
+    \centering
+    \LARGE PHYS-320\\
+    \LARGE Homework \#1\\[0.5em]
+    \large \today\\[0.5em]
+    \large Gian Villarini\par
+
+\endgroup
+\rule{\textwidth}{0.4pt}
+\pointsdroppedatright   %Self-explanatory
+\printanswers
+\renewcommand{\solutiontitle}{\noindent\textbf{Ans:}\enspace}   %Replace "Ans:" with starting keyword in solution box
+
+\begin{questions}
+
+    \question[Part A] Expression evaluation utilizing python\droppoints
+    
+    \begin{solution}
+    (Here, I'll go through my code explaining my thought process and how I approached this problem. Full codebase available here: \href{https://github.com/zaesho/PHYS.320-Math-Methods}{GitHub} )
+
+    First, I defined the abitrary vector components and assigned them to random integers, since I wanted to be able to test different values without having to change each component value over and over. I later changed the function from random reals to random integers, since I was encountering some FPP issues.
+            \begin{lstlisting}   
+import numpy as np
+
+# Problem 1
+# Defining base vectors with arbitrary components:
+# Having the components be randomly assigned as integers
+# to avoid floating point precision errors.
+
+a_1 = np.random.randint(0, 100) # Components for vector a
+a_2 = np.random.randint(0, 100)
+a_3 = np.random.randint(0, 100)
+
+.
+.
+.
+
+a = np.array([a_1, a_2, a_3])
+b = np.array([b_1, b_2, b_3])
+c = np.array([c_1, c_2, c_3])
+
+            \end{lstlisting}
+        Then, I recreated all expressions using numpy by dividing them into LHS (left hand side) and RHS (right hand side). Finally, I compared the expressions in a print statement to return boolean True/False. This is functionally the same as subtracting both expressions to return zero (what the problem statement asked).
+
+        \begin{lstlisting}
+# Eqn A: c dot ( a cross b ) = ( b cross a ) dot c
+
+eqna_lhs = np.dot(c, np.cross(a, b))
+eqna_rhs = np.dot(np.cross(b, a), c)
+
+print("Does Eqn A hold?",eqna_lhs,"==",
+      eqna_rhs," ",eqna_lhs == eqna_rhs)
+        \end{lstlisting}
+
+
+         I repeated the same system for the other 5 equations, with the only other change worthy noting was in Equation D: realizing that since the vector $\vec{d}\,$ is dotted in the end, the scalar constants $\lambda\ 
+          \&\ \mu$ were also effectively scalar constants and that I could rewrite the expression:
+        
+         \begin{equation}
+                    (\,\vec{a}\ \times\ \vec{b}\,)\ \cdot \ \vec{d}\ = \;0
+                    \quad\text{Where }\quad \vec{d}\ =\ \lambda \vec{a} \ + \ \mu \vec{b}
+                \end{equation}
+        \begin{equation}
+            (\,\vec{a}\ \times\ \vec{b}\,)\ \cdot (\ \lambda \vec{a} \ + \ \mu \vec{b}\ )\ = \;0
+        \end{equation}
+        \begin{equation}
+            (\,\vec{a}\ \times\ \vec{b}\,)\ \cdot \ \lambda \vec{a} \ + (\,\vec{a}\ \times\ \vec{b}\,)\ \cdot \ \mu \vec{b}=0
+        \end{equation}
+
+        Since the left hand side must equal zero, then clearly we can disregard any constant $\lambda\ \& \mu$. Thus I simply ran the code without these constants:
+        \begin{lstlisting}
+            eqnd_lhs = np.dot(np.cross(a, b), (a + b)) 
+            eqnd_rhs = 0
+            ...
+        \end{lstlisting}
+
+        Finally, I recieved this as the resultant output:
+        \begin{lstlisting}
+vec_a: [35 55 10]
+vec_b: [82 98 18]
+vec_c: [50 75 79]
+
+Does Eqn A hold? 
+-70570 == 70570   
+False
+
+Does Eqn B hold? 
+[ 124530   20170 -546790] == -70570  
+[False False False].
+
+Does Eqn C hold? 
+[ 124530   20170 -546790] == [ 124530   20170 -546790]   
+[ True  True  True].
+
+Does Eqn D hold? 
+0 == 0   
+True.
+
+Does Eqn E hold? 
+[5786740 6915860 1270260] == [-5786740 -6915860 -1270260]   
+[False False False].
+
+Does Eqn F hold? 
+-1854740 == -1854740   
+True.
+
+        \end{lstlisting}
+Thus, the final answer for Part A is:\newline
+| A. False 
+| B. False 
+| C. True 
+| D. True 
+| E. False 
+| F. True
+    \end{solution}
+\end{questions}
+
+\begin{questions}
+    
+\question[Part B] Physical/Geometric Interpretations of Eqn C \& Eqn D\droppoints
+
+\begin{solution}
+    So lets consider equation C:
+    \begin{equation}
+        \vec{a}\ \times\ (\ \vec{b}\ \times\ \vec{c}\ )\ =\ (\ \vec{a}\ \cdot\ \vec{c}\ )\,\vec{b}\ -\ (\ \vec{a}\ \cdot\ \vec{b}\ )\,\vec{c}
+    \end{equation}
+    Consider just the left hand side, notice the vector triple product. Now, we've known from class that we can represent an area vector $\vec{A}$ between two vectors via $\vec{A}\ =\ \vec{a}\ \times\ \vec{b}\ $:
+
+    Now, if we cross the resultant vector $\vec{A}$ with another vector $\vec{c}$, what we get instead is a new vector that lies in the plane of ${\vec{a}\ \&\ \vec{b}}$. Given the right hand side of the equation, which we know is true by the numerical analysis we did in Part (A), we can intuit what the vector triple product is. Put simply, it breaks down a given vector $\vec{a}$ into a linear combination of vectors $\vec{b}\ \&\ \vec{c}$ - so we've essentially broken down $\vec{a}$ into multiples of $\vec{b}\ \&\ \vec{c}$.
+
+\newpage
+    Now let's consider equation D:
+    \begin{equation}
+        \text{If}\ \vec{d}\ =\ \lambda\vec{a}\ +\ \mu\vec{b}\quad\text{then{}}\quad(\ \vec{a}\ \times\ \vec{b}\ )\ \cdot\ \vec{d}\ = 0
+    \end{equation}
+    What we see here is a special case of the scalar triple product, which normally would represent the volume through a parallelepiped of side lengths $\vec{a}\ \&\ \vec{b}$ and height $\vec{c}$. In this case, however, $\vec{d}$ is a linear combination of $\vec{a}\ \&\ \vec{b}$, which leads to some simplification on the expression (as shown earlier):
+
+    \begin{equation}
+                    (\,\vec{a}\ \times\ \vec{b}\,)\ \cdot \ \vec{d}\ = \;0
+                    \quad\text{Where }\quad \vec{d}\ =\ \lambda \vec{a} \ + \ \mu \vec{b}
+                \end{equation}
+        \begin{equation}
+            (\,\vec{a}\ \times\ \vec{b}\,)\ \cdot (\ \lambda \vec{a} \ + \ \mu \vec{b}\ )\ = \;0
+        \end{equation}
+        \begin{equation}
+            (\,\vec{a}\ \times\ \vec{b}\,)\ \cdot \ \lambda \vec{a} \ + (\,\vec{a}\ \times\ \vec{b}\,)\ \cdot \ \mu \vec{b}=0
+    \end{equation}
+
+    Now we can see the result clearly. Since this vector $\vec{a}\ \times\ \vec{b}$ is orthogonal to $\vec{a}\ \&\ \vec{b}$, then the dot product of $\vec{a}\ \&\ \vec{b}$ with this new orthogonal vector will always be zero (regardless of the scalar multiples). 
+\end{solution}  
+
+
+    \question[Part A/B] Unit Cell of Diamond\droppoints
+    \begin{solution}
+        Firstly, we need to establish a coordinate system where one edge of the cube is at the origin $\vec{O}$. Next, my thought process was to iterate through "steps" of A/4 until reaching our target "atom" - once "standing" at this coordinate, any step of A/4 in any direction will give us our four target vectors.
+
+        So we begin at the origin $\vec{O}$. Now lets define a step of $i=(A/4)(\vec{i}+\vec{j}+\vec{k})$ By the problem definition, we can reach our target vector by taking the step $i$. Now, there are two obvious solution vectors to this problem, that of $i\pm{i}$ - giving us, (from our reference point of the origin) the solution vectors: (well denote the solutions as $\vec{a,b,c,d}$
+        \begin{equation}
+            1.\ \vec{a}\ =\vec{O}
+        \end{equation}
+        \begin{equation}
+            2.\ \vec{b}\ =2i*<\hat{\textbf{i}},\hat{\textbf{j}},\hat{\textbf{k}}>
+        \end{equation}
+
+        Which leaves us with $\vec{c,d} = ?$
+
+        Now, to find the last vectors, we can interpret the problem geometrically. Notice were moving in the direction of a line equation of slope A/4: To get the remaining vectors, we find the line (and then the points along that line) perpendicular to this first slope. To find these vectors, I will assert that we can pick $ \hat{\textbf{i}}\ \text{or}\ \hat{\textbf{j}}$ to be positive or negative (alternating). We can later use the dot product to verify its consistency in angles with our first two solution (the first two solutions should be parallel, while these two should be at 109* angle, consistent with tetrahedral bond angles). Lets denote these potential solution vectors:
+
+    
+        \begin{equation}
+            3.\ \vec{c}\ =(A/4)<-\hat{\textbf{i}},\hat{\textbf{j}},\hat{\textbf{k}}>
+        \end{equation}
+        \begin{equation}
+            4.\ \vec{d}\ =(A/4)<\hat{\textbf{i}},-\hat{\textbf{j}},\hat{\textbf{k}}>
+        \end{equation}
+
+        Now to verify, lets first calculate the angle between our solutions and the origin using this dot product identity:
+
+        \begin{equation}
+            \cos{\theta}=\frac{\vec{a}\cdot\vec{b}}{|\vec{a}||\vec{b}|}\ \text{   For vectors }\vec{a}\ \&\ \vec{b}
+        \end{equation}
+        Now we solve:
+
+         (Note, I am disregarding A/4 terms in these solutions for visual simplicity)
+        \begin{equation}
+            \cos{\theta}=\frac{<-1,-1,-1>\cdot<1,1,1>}{3}\ 
+        \end{equation}
+        \begin{equation}
+            \cos{\theta}=\frac{-3}{3}\ 
+        \end{equation}
+        \begin{equation}
+            \cos{\theta}=-1\ 
+        \end{equation}
+        \begin{equation}
+            \theta=\arccos{-1}\ 
+        \end{equation}
+        \begin{equation}
+            \theta=180\deg\ 
+        \end{equation}
+
+    This is consistent with our assertion, lets continue with the potential solution vectors that we picked:
+
+    \begin{equation}
+            \cos{\theta}=\frac{<-1,1,1>\cdot<1,-1,1>}{3}\ 
+        \end{equation}
+        \begin{equation}
+            \cos{\theta}=\frac{-1}{3}\ 
+        \end{equation}
+       
+        \begin{equation}
+            \theta=\arccos{\frac{-1}{3}}\ 
+        \end{equation}
+        \begin{equation}
+            \theta=109\deg\ 
+        \end{equation}
+\newpage
+    Thus, our final solution vectors are:
+
+    \begin{equation}
+            1.\ \vec{a}\ =\vec{O}
+        \end{equation}
+        \begin{equation}
+            2.\ \vec{b}\ =2i*<\hat{\textbf{i}},\hat{\textbf{j}},\hat{\textbf{k}}>
+        \end{equation}
+        \begin{equation}
+            3.\ \vec{c}\ =i*<\hat{\textbf{-i}},\hat{\textbf{j}},\hat{\textbf{k}}>
+        \end{equation}
+        \begin{equation}
+            4.\ \vec{d}\ =i*<\hat{\textbf{i}},\hat{\textbf{-j}},\hat{\textbf{k}}>
+        \end{equation}
+    \end{solution}
+
+    \question[Part A-D] Angular Momentum Problem\droppoints
+
+    \begin{solution}
+        I think the first thing that popped out to me in the problem statement was the expression $m|v|d$. This is a special case of a cross product:
+        \begin{equation}
+            \vec{d}\times\ m\vec{v}=m|v|d\sin{\theta}
+        \end{equation}
+        The equation above is the full correct expression, note the $\sin$ component is dropped off because in the simplified expression we assume (and only utilize it) in the case where the direction is completely orthogonal to the velocity (since $\sin{(90\deg)}=1$). Thus, the full expression is the cross product, the algebraic expression is a special case where we can even take d to not be a vector but rather a scalar distance. The full equation takes into account the vector $\vec{r}$ with magnitude $\&\ \textbf{direction}$ which thus accounts for all cases and is generalized.
+        \begin{equation}
+            J=\vec{r}\times\ m\vec{v}=m|v|r\sin{\theta}
+        \end{equation}
+
+        (Part B)
+
+        Since the problem statement allowed for a rigid body, we can imagine a wheel, where all points stay at a fixed distance (but changing direction) from the origin: $\vec{r}$. We can denote the i-th particle's position using this $\vec{r_i}$.
+
+        Now, we know intuitively from definitions of angular velocity, that the instantaneous velocity MUST be perpendicular to both the axis of rotation (captured by the angular velocity vector $\vec{\omega}$) and the line connecting the particle to the axis of rotation (in our case, $\vec{r_i}$). We also know that its magnitude is proportional to $\vec{r_i}$ and $\vec{\omega}$ - this is the cross product). Thus, the i-th instantaneous velocity is defined by this cross product relationship:
+
+        \begin{equation}
+            \vec{v_i} = \omega\times\vec{r_i}
+        \end{equation}
+
+        (Part C)
+
+        For this part, lets recall from parts A and B the following relationships:
+
+        \begin{equation}
+            J=\vec{r}\times\ m\vec{v}=m|v|r\sin{\theta}
+        \end{equation}
+        \begin{equation}
+            \vec{v_i} = \omega\times\vec{r_i}
+        \end{equation}
+
+        Thus, we can define $J_i$ as:
+
+        \begin{equation}
+            J_i=\vec{r}\times\ m\vec{v_i}
+        \end{equation}
+
+        Now lets plug in our definition for instantaneous velocity:
+
+        \begin{equation}
+            J_i=\vec{r}\times\ m(\omega\times\vec{r_i})
+        \end{equation}
+
+        Now note, this is the vector triple product! Thus, we can use the identity to rewrite this using dot products:
+
+        \begin{equation}
+            J_i=\vec{r}\times\ m(\omega\times\vec{r_i}) = \omega(\vec{r_i}\cdot\vec{r_i})-\vec{r_i}(\vec{r_i}\cdot\omega)
+        \end{equation}
+        \begin{equation}
+            J_i=\vec{r_i^2}\,\omega\ -\ (\vec{r_i}\cdot\omega)\vec{r_i}
+        \end{equation}
+
+        Now finally, we can sum over all particles!
+
+        \begin{equation}
+            J = \sum J_i = \sum \vec{r_i^2}\,\omega\ -\ (\vec{r_i}\cdot\omega)\vec{r_i}
+        \end{equation}
+
+        (Part D)
+
+        For this, we'll use our special case equation from part A:
+        \begin{equation}
+            J=m|v|d
+        \end{equation}
+
+        Now recall the equation for momentum:
+         \begin{equation}
+            p_i=m_i\vec{v_i}
+        \end{equation}
+        From the problem equation:
+        \begin{equation}
+            I = \sum_i m_i\rho_i
+        \end{equation}
+
+        Here, $\rho_i$ is the distance from the axis to the i-th particle.
+        Using these concepts:
+        \begin{equation}
+            J=m_i|v_i|\rho_i = p_i\rho_i
+        \end{equation}
+        And for rigid rotation:
+        \begin{equation}
+            |v_i|=\omega\rho_i
+        \end{equation}
+        So now J becomes:
+        \begin{equation}
+            J_i = p_i\rho_i=m_i(\omega \rho_i)\rho_i = m_i\omega \rho_i^2
+        \end{equation}
+        Now we sum:
+        \begin{equation}
+            J = \sum_i J_i = \sum \omega m_i\rho_i^2
+        \end{equation}
+
+        \begin{equation}
+            J = \omega \sum  m_i\rho_i^2
+        \end{equation}
+        \begin{equation}
+            J = I\omega 
+        \end{equation}
+    
+    \end{solution}
+
+    \question[]Dot Product Physical Quantities
+    \begin{solution}
+        Here are three quantities I think use a dot product relationship:
+
+
+        First I immediately thought of was work:
+
+        \begin{equation}
+            W=\vec{F}\cdot\vec{d}
+        \end{equation}
+
+        This intuitively tells us that only he force that is in the direction of displacement applies to the work. Additionally, and force in the opposite direction has a negative contribution. If the force is perpendicular to the displacement, it does not contribute at all.
+
+        Secondly, I thought of electric flux:
+        \begin{equation}
+            \Phi_E=\vec{E}\cdot\vec{A}\quad \text{Where A is the area vector}
+        \end{equation}
+
+        Flux measures how much something passes through a surface - thus, this equation measures how much of the electric field is in line with the surface area. If it is fully parallel, then they will contribute maximally.
+
+
+        Lastly, I will use Power:
+
+        \begin{equation}
+            P=\vec{F}\cdot\vec{v}
+        \end{equation}
+
+        This tells us how much of the force is contributing to the velocity, and thus the transfer of energy. Interesting cases are negative power, which tells us the system is losing energy (represented by forces opposing motion).
+    \end{solution}
+\end{questions}
+
+
+\end{document}
